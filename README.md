@@ -1,1 +1,2 @@
-# weapon-infinity
+# WEAPON INFINITY
+フェーズ1の試作（戦闘の手応えと実機性能テスト）。個人用・少人数配布。
