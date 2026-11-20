@@ -74,7 +74,7 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;display:block}
 <script>
 (()=>{
 'use strict';
-const VER='v0.5 phase2';
+const VER='v0.6 phase2';
 const GATE_HASH='92ecd9c0a7b0966c845632fb0e71b992e478c299988231614ec6e503e6df9615';
 const $=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search);
@@ -228,8 +228,10 @@ function fmt(v){if(v<1000)return String(Math.floor(v));const u=['K','M','B','T',
 const MAXE=400,MAXA=120,MAXP=260,MAXN=60;
 const ex=new Float32Array(MAXE),ey=new Float32Array(MAXE),ehp=new Float64Array(MAXE),ekx=new Float32Array(MAXE),eky=new Float32Array(MAXE),efl=new Float32Array(MAXE),eph=new Float32Array(MAXE),ecd=new Float32Array(MAXE),epl=new Uint16Array(MAXE),ety=new Uint8Array(MAXE),eact=new Uint8Array(MAXE);
 let ealive=0,eptr=0;
+const emask=new Uint8Array(400),stT=new Float32Array(400*5),stD=new Float64Array(400*5),edt=new Float32Array(400);
+const SCOL=['#ff8a8a','#9bd0ff','#ffd23f','#ff5a7a','#8aff9b'],SPC=[4,2,1,4,5],SNAME=['火傷','凍結','感電','出血','毒'],SDUR=[3,2,3,4,5],SDOT=[.8,0,0,.6,.4];
 const MAXD=200,ox_=new Float32Array(MAXD),oy_=new Float32Array(MAXD),ovx=new Float32Array(MAXD),ovy=new Float32Array(MAXD),otm=new Float32Array(MAXD),okd=new Uint8Array(MAXD),ova=new Float32Array(MAXD),oact=new Uint8Array(MAXD),ow=new Array(MAXD).fill(null);let bGold=0,bExp0=0;
-const ax=new Float32Array(MAXA),ay=new Float32Array(MAXA),avx=new Float32Array(MAXA),avy=new Float32Array(MAXA),alife=new Float32Array(MAXA),apr=new Uint8Array(MAXA),adm=new Float64Array(MAXA),acr=new Float32Array(MAXA),ahit=new Int16Array(MAXA*4);
+const ax=new Float32Array(MAXA),ay=new Float32Array(MAXA),avx=new Float32Array(MAXA),avy=new Float32Array(MAXA),alife=new Float32Array(MAXA),apr=new Uint8Array(MAXA),adm=new Float64Array(MAXA),ael=new Int8Array(MAXA),acr=new Float32Array(MAXA),ahit=new Int16Array(MAXA*4);
 const px_=new Float32Array(MAXP),py_=new Float32Array(MAXP),pvx=new Float32Array(MAXP),pvy=new Float32Array(MAXP),plf=new Float32Array(MAXP),pcl=new Uint8Array(MAXP),psz=new Float32Array(MAXP);let pn=0;
 const PCOL=['#fff','#ffd23f','#9bd0ff','#d79bff','#ff8a8a','#8aff9b','#9aa4bd','#5fd08a','#6aa8ff','#ffb347'];
 const nx=new Float32Array(MAXN),ny=new Float32Array(MAXN),nlf=new Float32Array(MAXN),nsz=new Float32Array(MAXN),ncr=new Uint8Array(MAXN),nstr=new Array(MAXN).fill('');let nptr=0,ncount=0;
@@ -270,13 +272,15 @@ function spawnNum(x,y,v,crit){const L=LV[ql];
 function spawnE(){
   let i=-1;for(let k=0;k<MAXE;k++){const j=(eptr+k)%MAXE;if(!eact[j]){i=j;eptr=j+1;break;}}if(i<0)return;
   const rr=Math.random(),t=rr<.5?0:rr<.8?1:rr<.94?2:3;const a=Math.random()*6.283,ca=Math.abs(Math.cos(a))+1e-4,sa=Math.abs(Math.sin(a))+1e-4,d=Math.min((VW/2+30)/ca,(VH/2+30)/sa)+Math.random()*50;
-  ex[i]=P.x+Math.cos(a)*d;ey[i]=P.y+Math.sin(a)*d;ety[i]=t;eph[i]=Math.random()*6.283;ehp[i]=ET[t].hp*NUM()*ESC;ekx[i]=eky[i]=0;efl[i]=0;ecd[i]=0;epl[i]=0;eact[i]=1;ealive++;}
+  ex[i]=P.x+Math.cos(a)*d;ey[i]=P.y+Math.sin(a)*d;ety[i]=t;eph[i]=Math.random()*6.283;ehp[i]=ET[t].hp*NUM()*ESC;ekx[i]=eky[i]=0;efl[i]=0;ecd[i]=0;epl[i]=0;emask[i]=0;for(let k=0;k<5;k++){stT[i*5+k]=0;stD[i*5+k]=0;}edt[i]=0;eact[i]=1;ealive++;}
 function clearE(){eact.fill(0);ealive=0;}
 function kill(i){eact[i]=0;ealive--;kills++;{const t=ety[i],sc=1+.2*(curStage-1);spawnO(ex[i],ey[i],0,Math.ceil([1,1,3,10][t]*sc),null);if(Math.random()<.4)spawnO(ex[i],ey[i],1,Math.ceil([1,2,4,12][t]*sc),null);}drop(i);burst(ex[i],ey[i],ety[i]>=2?10:6,ety[i]===3?1:ety[i]===0?5:4,140,.45);}
-function hitE(i,dmg,kx,ky,crit){
+function hitE(i,dmg,kx,ky,crit,el){
+  if(emask[i]&4)dmg*=1.4;if(el>=0)dmg*=1.15;
   if(dmg>1e15)dmg=1e15;ehp[i]-=dmg;efl[i]=.09;ekx[i]+=kx;eky[i]+=ky;spawnNum(ex[i],ey[i]-ET[ety[i]].r,dmg,crit);
   if(pn<MAXP-4)burst(ex[i],ey[i],crit?4:2,crit?1:0,90,.25);
-  if(ehp[i]<=0)kill(i);}
+  if(ehp[i]<=0){kill(i);return;}
+  if(el>=0&&Math.random()<.3){const o=i*5+el;stT[o]=SDUR[el];if(SDOT[el])stD[o]=Math.max(stD[o],dmg*SDOT[el]);emask[i]|=1<<el;}}
 function nearest(x,y,maxd){let b=-1,bd=maxd*maxd;for(let i=0;i<MAXE;i++){if(!eact[i])continue;const dx=ex[i]-x,dy=ey[i]-y,d=dx*dx+dy*dy;if(d<bd){bd=d;b=i;}}return b;}
 
 /* ---------- 武器 ---------- */
@@ -289,14 +293,14 @@ function swing(w){
   const n=query(P.x,P.y,R+30);let hits=0;
   for(let q=0;q<n;q++){const i=qbuf[q];if(!eact[i])continue;const dx=ex[i]-P.x,dy=ey[i]-P.y,rr=R+ET[ety[i]].r,d2=dx*dx+dy*dy;if(d2>rr*rr)continue;
     let da=Math.atan2(dy,dx)-ang;while(da>3.1416)da-=6.2832;while(da<-3.1416)da+=6.2832;if(Math.abs(da)>half+.15)continue;
-    const d=Math.sqrt(d2)||1,crit=Math.random()<.15+w.crb;hitE(i,900*w.pow*NUM()*(crit?2:1),dx/d*230,dy/d*230,crit);hits++;}
+    const d=Math.sqrt(d2)||1,crit=Math.random()<.15+w.crb;hitE(i,900*w.pow*NUM()*(crit?2:1),dx/d*230,dy/d*230,crit,w.el);hits++;}
   if(hits){hitstop=Math.max(hitstop,hits>4?2:1);shake=Math.max(shake,3+Math.min(hits,6)*.5);}
 }
 function shoot(w){
   const t=nearest(P.x,P.y,430);const ang=t>=0?Math.atan2(ey[t]-P.y,ex[t]-P.x):P.face;
   let i=-1;for(let k=0;k<MAXA;k++)if(alife[k]<=0){i=k;break;}if(i<0)return;
   w.aim=ang;w.rc=.1;burst(P.x+Math.cos(ang)*22,P.y+Math.sin(ang)*22,1,1,70,.12);
-  ax[i]=P.x;ay[i]=P.y;avx[i]=Math.cos(ang)*780;avy[i]=Math.sin(ang)*780;alife[i]=.75;apr[i]=4;acr[i]=w.crb;arrowCol=w.el>=0?ELC[w.el]:'#ffe9a8';adm[i]=260*w.pow*NUM();for(let k=0;k<4;k++)ahit[i*4+k]=-1;
+  ax[i]=P.x;ay[i]=P.y;avx[i]=Math.cos(ang)*780;avy[i]=Math.sin(ang)*780;alife[i]=.75;apr[i]=4;acr[i]=w.crb;ael[i]=w.el;arrowCol=w.el>=0?ELC[w.el]:'#ffe9a8';adm[i]=260*w.pow*NUM();for(let k=0;k<4;k++)ahit[i*4+k]=-1;
 }
 function updWeapon(w,dt){
   const sp=(1+1.0*tapB)*w.spd;
@@ -310,11 +314,11 @@ function updWeapon(w,dt){
     const ob=3,R=w.sub?70:98;
     for(let k=0;k<ob;k++){const a=w.orb+k*6.2832/ob+w.ph,x=P.x+Math.cos(a)*R,y=P.y+Math.sin(a)*R,n=query(x,y,34);
       for(let q=0;q<n;q++){const i=qbuf[q];if(!eact[i]||ecd[i]>0)continue;const dx=ex[i]-x,dy=ey[i]-y,rr=ET[ety[i]].r+14;if(dx*dx+dy*dy>rr*rr)continue;
-        ecd[i]=.3;const d=Math.sqrt(dx*dx+dy*dy)||1,crit=Math.random()<.12+w.crb;hitE(i,150*w.pow*NUM()*(crit?2:1),dx/d*90,dy/d*90,crit);}}
+        ecd[i]=.3;const d=Math.sqrt(dx*dx+dy*dy)||1,crit=Math.random()<.12+w.crb;hitE(i,150*w.pow*NUM()*(crit?2:1),dx/d*90,dy/d*90,crit,w.el);}}
     w.pt-=dt*sp;if(w.pt<=0){w.pt=1.3;w.pr=0;pulseId=(pulseId+1)&0xffff||1;w.pid=pulseId;}
     if(w.pr>=0){w.pr+=dt*560;const Rr=Math.min(w.pr,200);const n=query(P.x,P.y,Rr+30);
       for(let q=0;q<n;q++){const i=qbuf[q];if(!eact[i]||epl[i]===w.pid)continue;const dx=ex[i]-P.x,dy=ey[i]-P.y,rr=Rr+ET[ety[i]].r;if(dx*dx+dy*dy>rr*rr)continue;
-        epl[i]=w.pid;const d=Math.sqrt(dx*dx+dy*dy)||1;hitE(i,220*w.pow*NUM(),dx/d*140,dy/d*140,false);}
+        epl[i]=w.pid;const d=Math.sqrt(dx*dx+dy*dy)||1;hitE(i,220*w.pow*NUM(),dx/d*140,dy/d*140,false,w.el);}
       if(w.pr>=200)w.pr=-1;}
   }
 }
@@ -394,10 +398,13 @@ function tick(dt){
     if(!eact[i])continue;const T=ET[ety[i]];
     let dx=P.x-ex[i],dy=P.y-ey[i];const d=Math.sqrt(dx*dx+dy*dy)||1;
     const rate=ety[i]===1?10:ety[i]===2?4.6:ety[i]===3?5.5:6.2;eph[i]+=dt*rate;const hh=Math.sin(eph[i]),mf=hh>0?4*hh*hh:.05;
-    let vx=dx/d*T.sp*mf,vy=dy/d*T.sp*mf;
+    const fz=(emask[i]&2)?.35:1;let vx=dx/d*T.sp*mf*fz,vy=dy/d*T.sp*mf*fz;
     if((i&1)===par){const n=query(ex[i],ey[i],T.r*2.2);let sx=0,sy=0;for(let q=0;q<n;q++){const j=qbuf[q];if(j===i||!eact[j])continue;const ox=ex[i]-ex[j],oy=ey[i]-ey[j],rr=(T.r+ET[ety[j]].r)*.9,d2=ox*ox+oy*oy;if(d2<rr*rr&&d2>.01){const dd=Math.sqrt(d2);const f=(rr-dd)/rr;sx+=ox/dd*f;sy+=oy/dd*f;}}vx+=sx*95;vy+=sy*95;}
     ex[i]+=(vx+ekx[i])*dt;ey[i]+=(vy+eky[i])*dt;ekx[i]*=.9;eky[i]*=.9;
     if(efl[i]>0)efl[i]-=dt;if(ecd[i]>0)ecd[i]-=dt;
+    if(emask[i]){let m=emask[i],dot=0;for(let k=0;k<5;k++){const o=i*5+k;if(stT[o]>0){stT[o]-=dt;if(stT[o]<=0){m&=~(1<<k);stD[o]=0;}else dot+=stD[o];}}emask[i]=m;
+      if(dot>0){ehp[i]-=dot*dt;edt[i]+=dt;if(edt[i]>=.5){edt[i]=0;spawnNum(ex[i],ey[i]-T.r,dot*.5,false);if(pn<MAXP-2){for(let k=0;k<5;k++)if(m>>k&1){burst(ex[i],ey[i],1,SPC[k],50,.3);break;}}}
+        if(ehp[i]<=0){kill(i);continue;}}}
     if(d<T.r+P.r&&P.inv<=0&&!S.inv&&!bench&&!autoplay&&!P.dead){P.hp-=T.d*EDM;P.inv=.6;shake=Math.max(shake,4);burst(P.x,P.y,5,4,110,.3);if(P.hp<=0){P.dead=1.4;showMsg('やられた…',1400);}}
   }
   updPick(dt);
@@ -408,7 +415,7 @@ function tick(dt){
     const n=query(ax[i],ay[i],26);
     for(let q=0;q<n&&apr[i]>0;q++){const j=qbuf[q];if(!eact[j])continue;const dx=ex[j]-ax[i],dy=ey[j]-ay[i],rr=ET[ety[j]].r+7;if(dx*dx+dy*dy>rr*rr)continue;
       let seen=0;for(let k=0;k<4;k++)if(ahit[i*4+k]===j)seen=1;if(seen)continue;
-      ahit[i*4+(4-apr[i])]=j;apr[i]--;const crit=Math.random()<.2+acr[i];const l=Math.hypot(avx[i],avy[i]);hitE(j,adm[i]*(crit?2:1),avx[i]/l*70,avy[i]/l*70,crit);if(apr[i]<=0)alife[i]=0;}}
+      ahit[i*4+(4-apr[i])]=j;apr[i]--;const crit=Math.random()<.2+acr[i];const l=Math.hypot(avx[i],avy[i]);hitE(j,adm[i]*(crit?2:1),avx[i]/l*70,avy[i]/l*70,crit,ael[i]);if(apr[i]<=0)alife[i]=0;}}
   // 粒・数字
   for(let i=0;i<pn;){plf[i]-=dt;if(plf[i]<=0){pn--;px_[i]=px_[pn];py_[i]=py_[pn];pvx[i]=pvx[pn];pvy[i]=pvy[pn];plf[i]=plf[pn];pcl[i]=pcl[pn];psz[i]=psz[pn];continue;}px_[i]+=pvx[i]*dt;py_[i]+=pvy[i]*dt;pvx[i]*=.94;pvy[i]*=.94;i++;}
   let c=0;for(let i=0;i<MAXN;i++){if(nlf[i]>0){nlf[i]-=dt;ny[i]-=38*dt;c++;}}ncount=c;
@@ -431,7 +438,8 @@ function render(){
     cx.moveTo(x+r*.9*sh,y+r*.78);cx.ellipse(x,y+r*.78,r*.9*sh,r*.3*sh,0,0,6.2832);}
   cx.fill();
   for(let i=0;i<MAXE;i++){if(!eact[i])continue;const x=ex[i],y=ey[i];if(x<vx0||x>vx1||y<vy0||y>vy1)continue;const t=ET[ety[i]],r=t.r;
-    const h=Math.sin(eph[i]),b=h>0?1+.16*h:1+.12*h,lift=h>0?h*r*.45:0,hg=2*r*b,s=(fl&&efl[i]>0)?t.fl:t.spr;cx.drawImage(s,x-r*(2-b),y+r*.95-hg-lift,r*2*(2-b),hg);}
+    const h=Math.sin(eph[i]),b=h>0?1+.16*h:1+.12*h,lift=h>0?h*r*.45:0,hg=2*r*b,s=(fl&&efl[i]>0)?t.fl:t.spr;cx.drawImage(s,x-r*(2-b),y+r*.95-hg-lift,r*2*(2-b),hg);
+    if(emask[i]){let o=0;for(let k=0;k<5;k++)if(emask[i]>>k&1){cx.fillStyle=SCOL[k];cx.beginPath();cx.arc(x-9+o*6,y-r-lift-4,2.6,0,7);cx.fill();o++;}}}
   {const kc=['#7ff0ff','#ffd23f'];for(let i=0;i<MAXD;i++){if(!oact[i])continue;const x=ox_[i],y=oy_[i];if(x<vx0||x>vx1||y<vy0||y>vy1)continue;const k=okd[i];
     if(k===2){cx.globalAlpha=.7;cx.drawImage(GLOW,x-14,y-14,28,28);cx.globalAlpha=1;cx.fillStyle=RCOL[ova[i]];const r=5+ova[i];cx.beginPath();cx.moveTo(x,y-r);cx.lineTo(x+r*.8,y);cx.lineTo(x,y+r);cx.lineTo(x-r*.8,y);cx.closePath();cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke();}
     else{cx.fillStyle=kc[k];cx.beginPath();cx.arc(x,y,k?3.4:2.6,0,7);cx.fill();}}}
@@ -585,7 +593,7 @@ function renderDetail(){
   const eqd=G.eq.indexOf(w.i)>=0,can=!eqd&&!w.lk;
   const ab=(a,t,on)=>'<button class="b'+(armed===a+':'+w.i?' warn':'')+'" data-a="'+a+'"'+(on===false?' disabled':'')+'>'+t+'</button>';
   el.innerHTML='<div class="tt" style="color:'+RCOL[w.r]+'">'+RK[w.r]+'　'+d.name+(w.lv?' +'+w.lv:'')+'</div>'
-   +'<div class="mut">'+TYPES[w.t]+'　属性：'+(d.el>=0?'<span style="color:'+ELC[d.el]+'">'+ELN[d.el]+'</span>':'なし')+'</div>'
+   +'<div class="mut">'+TYPES[w.t]+'　属性：'+(d.el>=0?'<span style="color:'+ELC[d.el]+'">'+ELN[d.el]+'（命中時30%で'+SNAME[d.el]+'・与ダメ+15%）</span>':'なし')+'</div>'
    +'<div class="mut">比較対象 <button class="b'+(invSlot===0?' on':'')+'" data-s="0">メイン</button><button class="b'+(invSlot===1?' on':'')+'" data-s="1">サブ</button></div>'
    +row('攻撃力',ATK(w),cd?dlt(d.atk,cd.atk):'')+row('攻撃速度','×'+d.spd.toFixed(2),cd?dlt(d.spd,cd.spd):'')+row('会心率','+'+(d.cr*100).toFixed(1)+'%',cd?dlt(d.cr,cd.cr):'')
    +'<div class="st"><span>個体値</span><span>'+Math.round(d.q*100)+'%</span></div>'
