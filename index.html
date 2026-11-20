@@ -74,7 +74,7 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;display:block}
 <script>
 (()=>{
 'use strict';
-const VER='v0.6 phase2';
+const VER='v0.7 phase2';
 const GATE_HASH='92ecd9c0a7b0966c845632fb0e71b992e478c299988231614ec6e503e6df9615';
 const $=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search);
@@ -184,7 +184,8 @@ const ET=[ // hp, spd, r, dmg
   {hp:1500,sp:62,r:11,d:14,spr:blob('#5ddc7b','#2a8a4a',11)},
   {hp:1000,sp:92,r:9,d:10,spr:blob('#b5a24a','#6b5d22',9,'ear')},
   {hp:6000,sp:52,r:16,d:24,spr:blob('#c8505a','#7a2630',16,'horn')},
-  {hp:20000,sp:70,r:22,d:38,spr:blob('#6a5dff','#34288f',22,'crown')}];
+  {hp:20000,sp:70,r:22,d:38,spr:blob('#6a5dff','#34288f',22,'crown')},
+  {hp:100000,sp:42,r:40,d:60,spr:blob('#ff9a3c','#8a4a10',40,'crown')}];
 for(const t of ET)t.fl=flashOf(t.spr);
 const TILE=(()=>{const s=mk(256,256),g=s.getContext('2d');g.fillStyle='#10131f';g.fillRect(0,0,256,256);
   g.strokeStyle='#161b2e';g.lineWidth=2;g.strokeRect(1,1,254,254);
@@ -246,7 +247,7 @@ function query(x,y,r){qid++;qn=0;const x0=Math.floor((x-r)/GC),x1=Math.floor((x+
 
 /* ---------- プレイヤー ---------- */
 const P={x:0,y:0,hp:300,mhp:300,inv:0,face:0,walk:0,r:11,dead:0};
-let ESC=1,EDM=1,curStage=1,tnow=0;
+let bossIdx=-1,bossDone=0,bossKill=0,ESC=1,EDM=1,curStage=1,tnow=0;
 let camx=0,camy=0,shake=0,hitstop=0,kills=0,tapB=0,tickN=0,simT=0,pulseId=1;
 const NUM=()=>NUMS[S.num];
 
@@ -269,15 +270,16 @@ function spawnNum(x,y,v,crit){const L=LV[ql];
   if(ql>=3&&!crit)return;
   if(ncount>=L.n&&!crit)return;
   const i=nptr;nptr=(nptr+1)%MAXN;nx[i]=x+(Math.random()-.5)*14;ny[i]=y-8;nlf[i]=.75;ncr[i]=crit?1:0;nsz[i]=crit?26:16;nstr[i]=fmt(v);ncount=Math.min(MAXN,ncount+1);}
-function spawnE(){
+function spawnE(ft){
   let i=-1;for(let k=0;k<MAXE;k++){const j=(eptr+k)%MAXE;if(!eact[j]){i=j;eptr=j+1;break;}}if(i<0)return;
-  const rr=Math.random(),t=rr<.5?0:rr<.8?1:rr<.94?2:3;const a=Math.random()*6.283,ca=Math.abs(Math.cos(a))+1e-4,sa=Math.abs(Math.sin(a))+1e-4,d=Math.min((VW/2+30)/ca,(VH/2+30)/sa)+Math.random()*50;
-  ex[i]=P.x+Math.cos(a)*d;ey[i]=P.y+Math.sin(a)*d;ety[i]=t;eph[i]=Math.random()*6.283;ehp[i]=ET[t].hp*NUM()*ESC;ekx[i]=eky[i]=0;efl[i]=0;ecd[i]=0;epl[i]=0;emask[i]=0;for(let k=0;k<5;k++){stT[i*5+k]=0;stD[i*5+k]=0;}edt[i]=0;eact[i]=1;ealive++;}
+  const rr=Math.random(),t=ft!=null?ft:rr<.5?0:rr<.8?1:rr<.94?2:3;const a=Math.random()*6.283,ca=Math.abs(Math.cos(a))+1e-4,sa=Math.abs(Math.sin(a))+1e-4,d=Math.min((VW/2+30)/ca,(VH/2+30)/sa)+Math.random()*50;
+  ex[i]=P.x+Math.cos(a)*d;ey[i]=P.y+Math.sin(a)*d;ety[i]=t;eph[i]=Math.random()*6.283;ehp[i]=ET[t].hp*NUM()*ESC;ekx[i]=eky[i]=0;efl[i]=0;ecd[i]=0;epl[i]=0;emask[i]=0;for(let k=0;k<5;k++){stT[i*5+k]=0;stD[i*5+k]=0;}edt[i]=0;eact[i]=1;ealive++;if(t===4)bossIdx=i;}
 function clearE(){eact.fill(0);ealive=0;}
-function kill(i){eact[i]=0;ealive--;kills++;{const t=ety[i],sc=1+.2*(curStage-1);spawnO(ex[i],ey[i],0,Math.ceil([1,1,3,10][t]*sc),null);if(Math.random()<.4)spawnO(ex[i],ey[i],1,Math.ceil([1,2,4,12][t]*sc),null);}drop(i);burst(ex[i],ey[i],ety[i]>=2?10:6,ety[i]===3?1:ety[i]===0?5:4,140,.45);}
+function kill(i){eact[i]=0;ealive--;kills++;if(ety[i]===4){bossKill=1;bossIdx=-1;const sc=1+.2*(curStage-1);spawnO(ex[i],ey[i],0,Math.ceil(120*sc),null);spawnO(ex[i],ey[i],1,Math.ceil(100*sc),null);for(let k=0;k<2;k++){const r=k===0?(Math.random()<.25?3:2):(Math.random()<.5?2:1);spawnO(ex[i],ey[i],2,r,mkW(Math.floor(Math.random()*3),r));}toast('BOSS撃破！','#ffd23f');shake=Math.max(shake,10);burst(ex[i],ey[i],30,1,260,.9);return;}
+  {const t=ety[i],sc=1+.2*(curStage-1);spawnO(ex[i],ey[i],0,Math.ceil([1,1,3,10][t]*sc),null);if(Math.random()<.4)spawnO(ex[i],ey[i],1,Math.ceil([1,2,4,12][t]*sc),null);}drop(i);burst(ex[i],ey[i],ety[i]>=2?10:6,ety[i]===3?1:ety[i]===0?5:4,140,.45);}
 function hitE(i,dmg,kx,ky,crit,el){
   if(emask[i]&4)dmg*=1.4;if(el>=0)dmg*=1.15;
-  if(dmg>1e15)dmg=1e15;ehp[i]-=dmg;efl[i]=.09;ekx[i]+=kx;eky[i]+=ky;spawnNum(ex[i],ey[i]-ET[ety[i]].r,dmg,crit);
+  if(dmg>1e15)dmg=1e15;ehp[i]-=dmg;efl[i]=.09;ekx[i]+=kx*(ety[i]===4?.15:1);eky[i]+=ky*(ety[i]===4?.15:1);spawnNum(ex[i],ey[i]-ET[ety[i]].r,dmg,crit);
   if(pn<MAXP-4)burst(ex[i],ey[i],crit?4:2,crit?1:0,90,.25);
   if(ehp[i]<=0){kill(i);return;}
   if(el>=0&&Math.random()<.3){const o=i*5+el;stT[o]=SDUR[el];if(SDOT[el])stD[o]=Math.max(stD[o],dmg*SDOT[el]);emask[i]|=1<<el;}}
@@ -377,6 +379,7 @@ function tick(dt){
   if(hitstop>0){hitstop--;return;}
   simT+=dt;bt+=dt;
   if(bt>=ST&&!bench&&!P.dead){endBattle('clear');return;}
+  if(!bossDone&&!bench&&bt>=ST*.4){bossDone=1;spawnE(4);toast('BOSS出現！','#ff8a3c');shake=Math.max(shake,8);}
   for(let k=toasts.length-1;k>=0;k--){toasts[k].l-=dt;if(toasts[k].l<=0)toasts.splice(k,1);}
   // 入力
   let ix=0,iy=0;
@@ -389,7 +392,7 @@ function tick(dt){
   tapB=Math.max(0,tapB-.35*dt);if(ptrs.size)tapB=Math.min(1,tapB+dt*1.1);if(bench||autoplay)tapB=.6;
   // 敵の補充
   tnow=S.nv||rampN();let sp=0;while(ealive<tnow&&sp<4){spawnE();sp++;}
-  while(ealive>tnow){let k=-1;for(let j=0;j<MAXE;j++)if(eact[j]){k=j;break;}if(k<0)break;eact[k]=0;ealive--;}
+  while(ealive>tnow){let k=-1;for(let j=0;j<MAXE;j++)if(eact[j]&&ety[j]!==4){k=j;break;}if(k<0)break;eact[k]=0;ealive--;}
   buildGrid();
   if((tickN&1)===0)aiMove();
   // 敵
@@ -397,7 +400,7 @@ function tick(dt){
   for(let i=0;i<MAXE;i++){
     if(!eact[i])continue;const T=ET[ety[i]];
     let dx=P.x-ex[i],dy=P.y-ey[i];const d=Math.sqrt(dx*dx+dy*dy)||1;
-    const rate=ety[i]===1?10:ety[i]===2?4.6:ety[i]===3?5.5:6.2;eph[i]+=dt*rate;const hh=Math.sin(eph[i]),mf=hh>0?4*hh*hh:.05;
+    const rate=ety[i]===1?10:ety[i]===2?4.6:ety[i]===3?5.5:ety[i]===4?3:6.2;eph[i]+=dt*rate;const hh=Math.sin(eph[i]),mf=hh>0?4*hh*hh:.05;
     const fz=(emask[i]&2)?.35:1;let vx=dx/d*T.sp*mf*fz,vy=dy/d*T.sp*mf*fz;
     if((i&1)===par){const n=query(ex[i],ey[i],T.r*2.2);let sx=0,sy=0;for(let q=0;q<n;q++){const j=qbuf[q];if(j===i||!eact[j])continue;const ox=ex[i]-ex[j],oy=ey[i]-ey[j],rr=(T.r+ET[ety[j]].r)*.9,d2=ox*ox+oy*oy;if(d2<rr*rr&&d2>.01){const dd=Math.sqrt(d2);const f=(rr-dd)/rr;sx+=ox/dd*f;sy+=oy/dd*f;}}vx+=sx*95;vy+=sy*95;}
     ex[i]+=(vx+ekx[i])*dt;ey[i]+=(vy+eky[i])*dt;ekx[i]*=.9;eky[i]*=.9;
@@ -476,6 +479,7 @@ function render(){
   const bw=Math.min(260,W*.34),bx=W/2-bw/2,by=8+0;cx.fillStyle='rgba(0,0,0,.55)';cx.fillRect(bx-2,by-2,bw+4,14);cx.fillStyle=P.hp/P.mhp>.3?'#4ddc7a':'#ff6a5a';cx.fillRect(bx,by,bw*Math.max(0,P.hp)/P.mhp,10);
   cx.fillStyle='#fff';cx.font='bold 11px sans-serif';cx.textAlign='center';cx.fillText('HP '+Math.max(0,Math.ceil(P.hp))+' / '+P.mhp+'   撃破 '+kills,W/2,by+24);
   {cx.textAlign='right';cx.fillText('Lv '+G.lv,bx-6,by+9);cx.textAlign='center';cx.fillStyle='rgba(0,0,0,.55)';cx.fillRect(bx-2,by+42,bw+4,6);cx.fillStyle='#7ff0ff';cx.fillRect(bx,by+43,bw*Math.min(1,G.exp/needExp(G.lv)),4);cx.fillStyle='#fff';
+   if(bossIdx>=0&&eact[bossIdx]&&ety[bossIdx]===4){const bb=bw*1.2,bx2=W/2-bb/2;cx.fillStyle='rgba(0,0,0,.6)';cx.fillRect(bx2-2,by+52,bb+4,10);cx.fillStyle='#ff8a3c';cx.fillRect(bx2,by+54,bb*Math.max(0,ehp[bossIdx])/(ET[4].hp*NUM()*ESC),6);cx.fillStyle='#fff';cx.fillText('BOSS',W/2,by+72);}
    const rem=Math.max(0,ST-bt);cx.fillText('STAGE '+curStage+'   残り '+Math.floor(rem/60)+':'+String(Math.floor(rem%60)).padStart(2,'0')+'   戦利品 '+bag.length+'/'+BAG_MAX+'   '+bGold+'G',W/2,by+38);
    cx.font='bold 13px sans-serif';cx.lineWidth=3;cx.strokeStyle='#000';for(let k=0;k<toasts.length;k++){const t=toasts[k],yy=H-70-k*18;cx.globalAlpha=Math.min(1,t.l*2);cx.strokeText(t.t,W/2,yy);cx.fillStyle=t.c;cx.fillText(t.t,W/2,yy);}cx.globalAlpha=1;cx.fillStyle='#fff';}
   const tb=Math.min(120,W*.2);cx.fillStyle='rgba(0,0,0,.5)';cx.fillRect(W-tb-14,H-22,tb,8);cx.fillStyle='#ffd23f';cx.fillRect(W-tb-14,H-22,tb*tapB,8);cx.fillStyle='#ddd';cx.font='10px sans-serif';cx.textAlign='right';cx.fillText('タップ加速',W-14,H-26);
@@ -548,7 +552,7 @@ function drop(i){
 function startBattle(){
   curStage=G.sel;ESC=.7*Math.pow(1.18,curStage-1);EDM=.6+.08*(curStage-1);
   clearE();pn=0;ncount=0;nlf.fill(0);alife.fill(0);for(const s of SL)s.l=0;
-  P.x=P.y=0;P.mhp=300+20*(G.lv-1);P.hp=P.mhp;oact.fill(0);bGold=0;bExp0=G.lv*1e6+G.exp;P.inv=1;P.dead=0;P.face=0;camx=camy=0;kills=0;tapB=0;bt=0;simT=0;bag=[];toasts.length=0;bagFull=0;hitstop=0;shake=0;
+  P.x=P.y=0;P.mhp=300+20*(G.lv-1);P.hp=P.mhp;oact.fill(0);bGold=0;bossIdx=-1;bossDone=0;bossKill=0;bExp0=G.lv*1e6+G.exp;P.inv=1;P.dead=0;P.face=0;camx=camy=0;kills=0;tapB=0;bt=0;simT=0;bag=[];toasts.length=0;bagFull=0;hitstop=0;shake=0;
   setW();mode='battle';show(null);$('panel').style.display='flex';last=performance.now();acc=0;applySize();syncUI();
 }
 function endBattle(kind){
@@ -557,7 +561,7 @@ function endBattle(kind){
   flushPick();mode='result';hideMsg();$('panel').style.display='none';
   let loot=bag.slice(),gold=0,info='';
   if(kind==='dead'){loot.sort((a,b)=>b.r-a.r);loot=loot.slice(0,Math.floor(loot.length/2));gold=Math.floor(kills/4);info='やられたため、戦利品は半分（'+loot.length+'個）になりました。';}
-  else if(kind==='clear'){gold=30*curStage+Math.floor(kills/2);info='ステージ'+curStage+' クリア！';if(curStage===G.stage){G.stage++;info+=' ステージ'+G.stage+'が解放されました。';}G.sel=Math.min(curStage+1,G.stage);}
+  else if(kind==='clear'){gold=30*curStage+Math.floor(kills/2);info='ステージ'+curStage+' クリア！'+(bossKill?' ボス撃破！':'');if(curStage===G.stage){G.stage++;info+=' ステージ'+G.stage+'が解放されました。';}G.sel=Math.min(curStage+1,G.stage);}
   else{gold=Math.floor(kills/3);info='帰還しました（戦利品は全て持ち帰れます）。';}
   gold+=bGold;G.gold+=gold;G.runs++;G.kills+=kills;
   info+='\n撃破 '+kills+'　獲得 '+gold+'G　Lv '+G.lv+'（次まで '+(needExp(G.lv)-G.exp)+'）';
@@ -681,7 +685,7 @@ applySize();syncUI();renderMenu();
 if(G.pend)openResult(Object.assign({},G.pend,{kind:'resume'}));else show('menu');
 if(qs.get('autobench')){startBattle();setTimeout(startBench,300);}
 requestAnimationFrame(frame);
-window.__wi={S,P,get G(){return G;},startBattle,endBattle,get bag(){return bag;},get mode(){return mode;},wd,mkW,get ealive(){return ealive;},get kills(){return kills;},get bench(){return bench;}};
+window.__wi={S,P,ehp,get bossIdx(){return bossIdx;},get G(){return G;},startBattle,endBattle,get bag(){return bag;},get mode(){return mode;},wd,mkW,get ealive(){return ealive;},get kills(){return kills;},get bench(){return bench;}};
 }
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 gate();
