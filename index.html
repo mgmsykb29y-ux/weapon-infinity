@@ -11,6 +11,7 @@
 <meta name="theme-color" content="#0b0d14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
 <title>WEAPON INFINITY</title>
 <style>
 html,body{margin:0;height:100%;background:#0b0d14;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;font-family:-apple-system,"Hiragino Sans",sans-serif;color:#dfe6ff}
@@ -71,6 +72,28 @@ html,body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",-a
 .rk2{display:inline-block;min-width:18px;padding:0 5px;border-radius:6px;color:#10142a;font-weight:900;text-align:center;margin-right:5px}
 .card{background:linear-gradient(#26327a,#141b4c);border:2px solid #8fa8ff;border-radius:14px;box-shadow:0 0 20px rgba(120,150,255,.45)}
 #rs .r2 b{text-shadow:0 2px 0 #10163a}
+/* ---- v0.12 ダーク・ドットRPG UI ---- */
+html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif}
+.b,.tt,.stn,.logo,.scr b,#rs .r2 b,.card b{font-weight:400}
+.scr{background:radial-gradient(ellipse at 50% -20%,#16206a 0%,#080c26 45%,#010208 100%)}
+.b{background:#0a0e3a;border:3px solid #c8c8d8;border-radius:0;color:#fff;text-shadow:2px 2px 0 #000;box-shadow:0 0 0 3px #000,inset 0 0 0 2px #2a3a9a,4px 4px 0 3px #000;margin:2px 3px 3px 2px}
+.b:active{transform:translate(2px,2px);box-shadow:0 0 0 3px #000,inset 0 0 0 2px #2a3a9a,2px 2px 0 3px #000}
+.b.on{background:#5a1208;border-color:#d8b84a;color:#ffd23a;text-shadow:2px 2px 0 #000;box-shadow:0 0 0 3px #000,inset 0 0 0 2px #c83a2a,4px 4px 0 3px #000}
+.b.warn{background:#7a1208;border-color:#ff9a8a}
+.card2,.card{background:#0a0e3a;border:3px solid #c8c8d8;border-radius:0;box-shadow:0 0 0 3px #000,inset 0 0 0 2px #2a3a9a,5px 5px 0 3px #000}
+.stg{border-color:var(--sc,#c8c8d8)}
+.logo{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#e8c85a;filter:none;text-shadow:3px 3px 0 #5a1208,5px 5px 0 #000}
+.logo span{background:none;color:#fff;-webkit-background-clip:border-box;background-clip:border-box;text-shadow:3px 3px 0 #2a3a9a,5px 5px 0 #000}
+.stn{color:#e8c85a;text-shadow:2px 2px 0 #000}.tt{text-shadow:2px 2px 0 #000}
+.go{background:#5a1208;border-color:#e8c85a;color:#ffd23a;text-shadow:3px 3px 0 #000;animation:none;box-shadow:0 0 0 3px #000,inset 0 0 0 2px #c83a2a,5px 5px 0 3px #000;letter-spacing:10px}
+.go::before{content:"▶ ";color:#fff}
+.bar{border-radius:0;border:2px solid #c8c8d8;background:#02030c}.bar i{background:repeating-linear-gradient(90deg,#4a8ae8 0 6px,#2a5ab8 6px 8px)}
+.ic{border-radius:0}.rk2,.wr b.rk{border-radius:0}
+.it{background:#0a0e3a;border:3px solid #5a6aa8;border-left:6px solid var(--rc,#5a6aa8);border-radius:0;box-shadow:0 0 0 2px #000}
+.it.sel{border-color:#e8c85a;border-left-color:var(--rc,#e8c85a);background:#16206a}
+.it.sel .nm::before{content:"▶ ";color:#e8c85a}
+.mut{color:#7a88d0}.st{border-bottom:2px dotted #2a3a9a}
+#gate input,#dat textarea,#res textarea{border-radius:0;border:3px solid #c8c8d8}
 </style>
 </head>
 <body>
@@ -110,7 +133,7 @@ html,body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",-a
 <script>
 (()=>{
 'use strict';
-const VER='v0.11.0 phase4';
+const VER='v0.12.0 phase5';
 const GATE_HASH='92ecd9c0a7b0966c845632fb0e71b992e478c299988231614ec6e503e6df9615';
 const $=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search);
@@ -631,7 +654,7 @@ function tick(dt){
 }
 
 /* ---------- 演出・HUD ---------- */
-const FONT='"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif';
+const FONT='"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif';try{document.fonts&&document.fonts.load('16px DotGothic16','あ');}catch(e){}
 let SAL=0,SAR=0,SAT=0,SAB=0;
 function measureSA(){const e=$('sa');if(!e)return;const c=getComputedStyle(e);SAT=parseFloat(c.paddingTop)||0;SAR=parseFloat(c.paddingRight)||0;SAB=parseFloat(c.paddingBottom)||0;SAL=parseFloat(c.paddingLeft)||0;}
 const MAXS=120,spx=new Float32Array(MAXS),spy=new Float32Array(MAXS),spvx=new Float32Array(MAXS),spvy=new Float32Array(MAXS),spl=new Float32Array(MAXS),spc=new Uint8Array(MAXS);let spn=0;
@@ -639,8 +662,8 @@ function spawnSpark(x,y,n,c,sp){for(let k=0;k<n&&spn<MAXS;k++){const a=Math.rand
 function updSparks(dt){for(let i=0;i<spn;){spl[i]-=dt;if(spl[i]<=0){spn--;spx[i]=spx[spn];spy[i]=spy[spn];spvx[i]=spvx[spn];spvy[i]=spvy[spn];spl[i]=spl[spn];spc[i]=spc[spn];continue;}spx[i]+=spvx[i]*dt;spy[i]+=spvy[i]*dt;spvx[i]*=.9;spvy[i]*=.9;i++;}}
 const ban={l:0,m:1,t:'',s:'',c:'#fff'};
 function showBanner(t,s,c,d){ban.t=t;ban.s=s||'';ban.c=c||'#fff';ban.l=ban.m=d||2;}
-function rr(x,y,w,h,r){cx.beginPath();cx.roundRect(x,y,w,h,r);}
-function txt(s,x,y,size,col,align){cx.font='bold '+size+'px '+FONT;cx.textAlign=align||'left';cx.textBaseline='alphabetic';cx.lineJoin='round';cx.lineWidth=Math.max(2.5,size*.24);cx.strokeStyle='rgba(8,6,22,.92)';cx.strokeText(s,x,y);cx.fillStyle=col||'#fff';cx.fillText(s,x,y);}
+function rr(x,y,w,h,r){const n=Math.max(1,Math.min(3,h/3,w/3));cx.beginPath();cx.moveTo(x+n,y);cx.lineTo(x+w-n,y);cx.lineTo(x+w-n,y+n);cx.lineTo(x+w,y+n);cx.lineTo(x+w,y+h-n);cx.lineTo(x+w-n,y+h-n);cx.lineTo(x+w-n,y+h);cx.lineTo(x+n,y+h);cx.lineTo(x+n,y+h-n);cx.lineTo(x,y+h-n);cx.lineTo(x,y+n);cx.lineTo(x+n,y+n);cx.closePath();}
+function txt(s,x,y,size,col,align){cx.font=size+'px '+FONT;cx.textAlign=align||'left';cx.textBaseline='alphabetic';cx.lineJoin='round';cx.lineWidth=Math.max(2.5,size*.24);cx.strokeStyle='rgba(8,6,22,.92)';cx.strokeText(s,x,y);cx.fillStyle=col||'#fff';cx.fillText(s,x,y);}
 function drawHero(x,y){
   const sw=Math.sin(P.walk),mv=aiMoving,fx=Math.cos(P.face)<0?-1:1;
   cx.save();cx.translate(x,y);cx.globalAlpha=P.inv>0&&((simT*20)|0)%2?.45:1;
@@ -677,7 +700,7 @@ function drawHUD(){
   txt('KILL '+kills,bx+2,y0+50,11,'#ffe9a8','left');
   // 中央：タイマー
   const rem=Math.max(0,ST-bt),tw=132,tx=W/2-tw/2;
-  cx.fillStyle='rgba(10,8,30,.72)';rr(tx,y0,tw,44,12);cx.fill();cx.strokeStyle=rgba(TH.acc[1],.9);cx.lineWidth=1.6;rr(tx,y0,tw,44,12);cx.stroke();
+  cx.fillStyle='rgba(10,8,30,.72)';rr(tx,y0,tw,44,12);cx.fill();cx.strokeStyle='#c8c8d8';cx.lineWidth=3;rr(tx,y0,tw,44,12);cx.stroke();
   txt('STAGE '+curStage+(hd?(hd===1?'  HARD':'  EXTREME'):''),W/2,y0+14,10.5,hd?'#ff9a7a':'#cdd8ff','center');txt(Math.floor(rem/60)+':'+String(Math.floor(rem%60)).padStart(2,'0'),W/2,y0+37,24,rem<15?'#ff8a7a':'#fff','center');
   // 右：お金・バッグ
   const rx=W-SAR-92;
