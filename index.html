@@ -106,7 +106,7 @@ html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",
   <div id="body">
     <div class="row"><span class="lab">敵数</span><button class="b" data-n="0">自動</button><button class="b" data-n="30">30</button><button class="b" data-n="60">60</button><button class="b" data-n="100">100</button><button class="b" data-n="150">150</button><button class="b" data-n="250">250</button></div>
     <div class="row"><span class="lab">数値</span><button class="b" id="bNum"></button><button class="b" id="bGov"></button><button class="b" id="bInv"></button></div>
-    <div class="row"><button class="b" id="bBench">ベンチ開始</button><button class="b" id="bHud">表示切替</button></div>
+    <div class="row"><button class="b" id="bBench">ベンチ開始</button><button class="b" id="bHud">表示切替</button><button class="b" id="bSpawn">武器スポーン</button></div>
   </div>
 </div>
 <div id="menu" class="scr"><div class="mcols">
@@ -115,7 +115,7 @@ html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",
   <div class="r2" style="gap:6px"><button class="b" id="mnMd" style="flex:1.2;min-height:40px;font-size:12px;padding:0 4px"></button><button class="b" id="mnTg" style="flex:1;min-height:40px;font-size:12px;padding:0 4px"></button><button class="b" id="mnHd" style="flex:1;min-height:40px;font-size:12px;padding:0 4px"></button></div>
   <button class="b big go" id="mnGo">出撃</button>
   <div class="r2" style="gap:8px"><button class="b" id="mnInv" style="flex:1;min-height:44px">所持品</button><button class="b" id="mnTr" style="flex:1;min-height:44px">強化所</button><button class="b" id="mnDat" style="flex:1;min-height:44px">データ</button></div>
-  <div class="r2" style="gap:8px"><button class="b" id="mnCd" style="flex:1;min-height:40px">図鑑</button><button class="b" id="mnCf" style="flex:1;min-height:40px">合成</button></div>
+  <div class="r2" style="gap:8px"><button class="b" id="mnCd" style="flex:1;min-height:40px">図鑑</button><button class="b" id="mnCf" style="flex:1;min-height:40px">合成</button><button class="b" id="mnAc" style="flex:1;min-height:40px">実績</button></div>
   <div class="mut" style="text-align:center">移動は自動／画面タップ・長押しで攻撃加速</div></div></div></div>
 <div id="inv" class="scr"><div class="r2"><button class="b" id="ivBack">← 戻る</button><span id="ivHead" style="flex:1"></span><button class="b" data-f="-1">全</button><button class="b" data-f="0">大剣</button><button class="b" data-f="1">弓</button><button class="b" data-f="2">魔導書</button><button class="b" data-f="3">槍</button><button class="b" data-f="4">双剣</button></div>
  <div class="r2" style="gap:5px" id="ivBar"><button class="b" data-rk="-1">全ランク</button><button class="b" data-rk="0">C</button><button class="b" data-rk="1">B</button><button class="b" data-rk="2">A</button><button class="b" data-rk="3">S</button><button class="b" data-rk="4">Z</button><button class="b" data-rk="5">X</button><button class="b" id="ivSort"></button><input id="ivQ" placeholder="名前で検索" style="width:110px;min-height:30px;background:#02030c;color:#fff;border:3px solid #c8c8d8;border-radius:0;padding:0 6px;font:inherit;-webkit-user-select:text;user-select:text"><button class="b" id="ivAuto">自動装備</button><button class="b" id="ivPm"></button><button class="b" data-pm="0">P1</button><button class="b" data-pm="1">P2</button><button class="b" data-pm="2">P3</button></div>
@@ -129,7 +129,9 @@ html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",
 <div id="gr" class="scr"><div class="r2"><button class="b" id="grBack">← 戻る</button><span id="grHead" style="flex:1"></span></div><div id="grList" class="sc" style="flex:1"></div></div>
 <div id="cd" class="scr"><div class="r2"><button class="b" id="cdBack">← 戻る</button><span id="cdHead" style="flex:1"></span></div><div id="cdList" class="sc" style="flex:1"></div></div>
 <div id="cf" class="scr"><div class="r2"><button class="b" id="cfBack">← 戻る</button><span id="cfHead" style="flex:1"></span></div><div class="r2" id="cfBar" style="gap:5px"></div><div id="cfList" class="sc" style="flex:1"></div><div class="r2"><span id="cfSum" class="mut" style="flex:1"></span><button class="b on big" id="cfGo">合成する</button></div></div>
+<div id="ac" class="scr"><div class="r2"><button class="b" id="acBack">← 戻る</button><span id="acHead" style="flex:1"></span></div><div id="acList" class="sc" style="flex:1"></div></div>
 <div id="tr" class="scr"><div class="r2"><button class="b" id="trBack">← 戻る</button><span id="trHead" style="flex:1"></span></div><div id="trList" class="sc" style="flex:1"></div></div>
+<div id="dtoast" style="position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:30;display:none;background:#0a0e3a;border:3px solid #e8c85a;color:#ffd23f;padding:6px 14px;box-shadow:0 0 0 3px #000;pointer-events:none;font-size:14px"></div>
 <div id="pk" class="scr" style="z-index:9;background:rgba(8,10,18,.9);align-items:center;justify-content:center;text-align:center"><div id="pkT" style="font-size:20px;font-weight:700">強化を選ぼう</div><div id="pkS" class="mut"></div><div id="pkC" class="r2" style="justify-content:center;gap:12px"></div></div>
 <div id="msg"></div>
 <div id="rot"><div style="font-size:42px">📱↻</div><div>端末を横向きにしてください</div></div>
@@ -139,7 +141,7 @@ html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",
 <script>
 (()=>{
 'use strict';
-const VER='v0.13.0 phase6';
+const VER='v0.17.0 phase8';
 const GATE_HASH='92ecd9c0a7b0966c845632fb0e71b992e478c299988231614ec6e503e6df9615';
 const $=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search);
@@ -960,7 +962,7 @@ function dbgUpdate(){
 
 
 /* ---------- 拾い物（経験値・お金・武器）---------- */
-const PM=()=>(1+.03*(G.lv-1))*(1+.04*G.up[1])*(1+cdBonus())*(1+(G.rb|0)*.1),MH=()=>300+20*(G.lv-1)+25*G.up[0];
+const PM=()=>(1+.03*(G.lv-1))*(1+.04*G.up[1])*(1+cdBonus())*(1+acBonus())*(1+(G.rb|0)*.1),MH=()=>300+20*(G.lv-1)+25*G.up[0];
 const needExp=l=>Math.floor(60*Math.pow(l,1.6));
 function updPow(){for(let i=0;i<2;i++){const g=wById(G.eq[i])||G.inv[0];WP[i].pow=wd(g).atk*(i?.6:1)*PM();}}
 function spawnO(x,y,kd,val,w){
@@ -1003,7 +1005,7 @@ const ST=Math.max(10,+(qs.get('st')||120)),autoplay=!!qs.get('auto');
 function rampN(){return bm==='hunt'?14:bm==='endless'?Math.min(220,50+curStage*6+Math.floor(bt/2.5)):bm==='dungeon'?Math.min(200,45+fl*5+curStage*3):Math.min(220,40+curStage*8+Math.floor(70*Math.min(1,bt/STv)));}
 function toast(t,c,l){toasts.push({t,c,l:l||2.4});if(toasts.length>4)toasts.shift();}
 function drop(i){
-  const t=ety[i];if(Math.random()>=[.027,.022,.105,.39][t]*(1+.04*G.up[2])*[1,1.15,1.3][hd])return;
+  const t=ety[i];if(Math.random()>=[.027,.022,.105,.39][t]*(1+.04*G.up[2]+.02*G.rb)*[1,1.15,1.3][hd])return;
   if(bag.length>=BAG_MAX){if(!bagFull){bagFull=1;toast('戦利品バッグが満杯です','#ff8a8a');}return;}
   const r=rollR([1,1.3,2.5,4][t]);
   const w=mkW(pickT(),r);spawnO(ex[i],ey[i],2,r,w);
@@ -1036,7 +1038,7 @@ function endBattle(kind){
   else{gold=Math.floor(kills/3);mat=Math.floor(curStage/3);info='帰還しました（戦利品は全て持ち帰れます）。';}
   gold+=bGold;G.gold+=gold;G.mat+=mat;G.runs++;G.kills+=kills;
   info+='\n撃破 '+kills+'　獲得 '+gold+'G＋素材'+mat+'　Lv '+G.lv+'（次まで '+(needExp(G.lv)-G.exp)+'）';
-  G.pend={kind,loot,info};gsave();
+  G.pend={kind,loot,info};checkAc();gsave();
   openResult(G.pend);
 }
 
@@ -1079,7 +1081,7 @@ function wIcon(w,sz){const d=wd(w),key=w.t+'_'+w.r+'_'+(w.s&3)+'_'+d.el;if(ICO[k
   else{g.rotate(-.9);g.drawImage(WS_,-8,-10,40,16);g.rotate(1.8);g.drawImage(WS_,-8,-10,40,16);}
   g.restore();const u=c.toDataURL();ICO[key]=u;return '<img class="ic" style="'+(sz?'width:'+sz+'px;height:'+sz+'px':'')+'" src="'+u+'">';}
 function rowOf(w,extra,attrs){return '<div class="it'+(w.r>=4?' z':'')+'" style="--rc:'+RCOL[w.r]+'" '+attrs+'>'+wIcon(w)+'<span class="nm"><span class="rk2" style="background:'+RCOL[w.r]+'">'+RK[w.r]+'</span>'+wd(w).name+(w.lv?' +'+w.lv:'')+'</span>'+extra+'</div>';}
-function renderMenu(){
+function renderMenu(){checkAc();
   const th=THEMES[(G.sel-1)%5];
   $('mnPl').innerHTML='<div class="r2" style="justify-content:space-between"><b style="font-size:17px">Lv '+G.lv+'</b><span>🪙 <b>'+G.gold+'</b>G　素材 <b>'+G.mat+'</b></span></div><div class="bar" style="margin-top:6px"><i style="width:'+Math.min(100,100*G.exp/needExp(G.lv))+'%"></i></div>';
   const m=wById(G.eq[0]),sb=wById(G.eq[1]);
@@ -1227,6 +1229,21 @@ $('cfGo').onclick=()=>{const r=cfRank;if(cfSel.size!==CFN[r]||G.gold<CFG[r])retu
   const nw=mkW(cfType>=0?cfType:Math.floor(Math.random()*TYPES.length),r+1);nw.i=G.nid++;G.inv.push(nw);cdSee(nw);gsave();ivNote='合成：'+RK[r+1]+'ランクの '+wd(nw).name+' ができました！';invSel=nw.i;renderCf();
   $('cfHead').insertAdjacentHTML('beforeend','<br><b style="color:#ffd23f">できた！ '+RK[r+1]+' '+wd(nw).name+'</b>');};
 $('cfBack').onclick=()=>{renderMenu();show('menu');};
+
+/* ---------- 実績・称号 ---------- */
+const hasR=r=>[0,1,2,3,4].some(t=>G.cd.includes(t*6+r));
+const ACH=[['初陣','バトルを1回行う',()=>G.runs>=1],['百人斬り','累計100体撃破',()=>G.kills>=100],['千人斬り','累計1,000体撃破',()=>G.kills>=1000],['万人斬り','累計10,000体撃破',()=>G.kills>=10000],
+ ['冒険者','ステージ5に到達',()=>G.stage>=5],['勇者','ステージ10に到達',()=>G.stage>=10],['Aランク入手','Aランクの武器を入手',()=>hasR(2)],['Sランク入手','Sランクの武器を入手',()=>hasR(3)],['Zランク入手','Zランクの武器を入手',()=>hasR(4)],['隠しランク','Xランクの武器を入手',()=>hasR(5)],
+ ['進化の道','武器を進化させる',()=>G.inv.some(w=>w.ev)],['覚醒者','武器を覚醒させる',()=>G.inv.some(w=>w.aw)],['強化の極み','武器を+20まで強化',()=>G.inv.some(w=>w.lv>=20)],['固有武器','固有武器を入手',()=>G.uk.length>=1],['固有コンプ','固有武器を5種入手',()=>G.uk.length>=5],
+ ['収集家','図鑑を30個発見',()=>G.cd.length>=30],['図鑑マスター','図鑑を全て発見',()=>G.cd.length>=65],['粘り強さ','無限戦闘で3分生存',()=>G.hi.e>=180],['不屈','無限戦闘で10分生存',()=>G.hi.e>=600],['探索者','ダンジョン10階到達',()=>G.hi.d>=10],['深淵の探索者','ダンジョン20階到達',()=>G.hi.d>=20],['転生者','転生する',()=>G.rb>=1],['成長','プレイヤーLv30到達',()=>G.lv>=30]];
+const acBonus=()=>Math.min(.2,.01*G.ac.length);
+function checkAc(){let n=0;ACH.forEach((a,i)=>{if(!G.ac.includes(i)&&a[2]()){G.ac.push(i);n++;dToast('称号獲得：'+a[0]+'（攻撃力+1%）');}});if(n)gsave();}
+let dtq=[],dtb=0;function dToast(t){dtq.push(t);if(!dtb)dtNext();}
+function dtNext(){const e=$('dtoast');if(!dtq.length){dtb=0;e.style.display='none';return;}dtb=1;e.textContent=dtq.shift();e.style.display='block';setTimeout(dtNext,2200);}
+function renderAc(){$('acHead').innerHTML='<b>実績・称号</b>　<span class="mut">'+G.ac.length+'/'+ACH.length+'　全武器の攻撃力 +'+(acBonus()*100).toFixed(0)+'%（上限+20%）</span>';
+  $('acList').innerHTML=ACH.map((a,i)=>{const d=G.ac.includes(i);return '<div class="it" style="'+(d?'border-left-color:#e8c85a':'opacity:.65')+'"><span class="nm">'+(d?'★ ':'☆ ')+a[0]+'<span class="mut">　'+a[1]+'</span></span></div>';}).join('');}
+$('acBack').onclick=()=>{renderMenu();show('menu');};
+$('mnAc').onclick=()=>{checkAc();renderAc();show('ac');};
 let rsList=[],rsAct=[];
 const AUTOLAB=['おまかせ：なし','おまかせ：Cを売却','おまかせ：C・Bを売却','おまかせ：Cを分解','おまかせ：C・Bを分解'];
 const autoAct=w=>G.auto===0?0:G.auto<=2?(w.r<G.auto&&!w.un?1:0):(w.r<G.auto-2&&!w.un?2:0);
@@ -1250,12 +1267,14 @@ function resDone(){
   G.pend=null;gsave();renderMenu();show('menu');
 }
 const UPN=['体力','攻撃力','ドロップ運','経験値','お金'],UPD=['最大HP +25','武器の攻撃力 +4%','武器ドロップ率 +4%','経験値 +5%','お金 +5%'];
+let rbArm=0;
 const upCost=l=>Math.round(40*Math.pow(1.35,l));
 function renderTr(){
   $('trHead').innerHTML='強化所　所持金 <b>'+G.gold+'</b>G';
-  $('trList').innerHTML=UPN.map((n,i)=>{const l=G.up[i],mx=l>=30,c=upCost(l);return '<div class="it" style="min-height:48px"><b style="min-width:90px">'+n+' Lv'+l+'</b><span class="nm mut">'+UPD[i]+'（今 +'+(i===0?25*l:i===1||i===2?4*l+'%':5*l+'%')+'）</span><button class="b" data-u="'+i+'"'+(mx||G.gold<c?' disabled':'')+'>'+(mx?'MAX':c+'G')+'</button></div>';}).join('');
+  const rbOk=G.lv>=25;
+  $('trList').innerHTML='<div class="card2" style="margin-bottom:6px"><b>転生</b>　<span class="mut">プレイヤーLv25以上で可能。Lvと強化所の強化をリセットし、永続で攻撃力+10%・ドロップ率+2%（現在 '+G.rb+'回）。武器・お金・素材・図鑑は残ります</span><div class="r2"><button class="b'+(rbArm?' warn':'')+'" id="rbGo"'+(rbOk?'':' disabled')+'>'+(rbArm?'もう一度タップで転生':'転生する（現在Lv'+G.lv+'）')+'</button></div></div>'+UPN.map((n,i)=>{const l=G.up[i],mx=l>=30,c=upCost(l);return '<div class="it" style="min-height:48px"><b style="min-width:90px">'+n+' Lv'+l+'</b><span class="nm mut">'+UPD[i]+'（今 +'+(i===0?25*l:i===1||i===2?4*l+'%':5*l+'%')+'）</span><button class="b" data-u="'+i+'"'+(mx||G.gold<c?' disabled':'')+'>'+(mx?'MAX':c+'G')+'</button></div>';}).join('');
 }
-$('trList').onclick=e=>{const b=e.target.closest('[data-u]');if(!b||b.disabled)return;const i=+b.dataset.u,c=upCost(G.up[i]);if(G.gold>=c&&G.up[i]<30){G.gold-=c;G.up[i]++;gsave();renderTr();}};
+$('trList').onclick=e=>{if(e.target.closest('#rbGo')){if(G.lv<25)return;if(!rbArm){rbArm=1;renderTr();setTimeout(()=>{rbArm=0;renderTr();},2500);return;}rbArm=0;G.rb++;G.lv=1;G.exp=0;G.up=[0,0,0,0,0];checkAc();gsave();dToast('転生しました！ 攻撃力+10%（計'+G.rb*10+'%）');renderTr();return;}const b=e.target.closest('[data-u]');if(!b||b.disabled)return;const i=+b.dataset.u,c=upCost(G.up[i]);if(G.gold>=c&&G.up[i]<30){G.gold-=c;G.up[i]++;gsave();renderTr();}};
 $('mnTr').onclick=()=>{renderTr();show('tr');};
 $('trBack').onclick=()=>{renderMenu();show('menu');};
 $('dtBgm').onclick=()=>{BGON^=1;try{localStorage.setItem('wi-bgm',BGON?'1':'0');}catch(e){}$('dtBgm').textContent='BGM：'+(BGON?'ON':'OFF');if(BGON)audioInit();};
@@ -1308,6 +1327,7 @@ $('bNum').onclick=()=>{S.num=(S.num+1)%NUMS.length;clearE();save();syncUI();};
 $('bGov').onclick=()=>{S.gov^=1;if(!S.gov)setQ(0);save();syncUI();};
 $('bInv').onclick=()=>{S.inv^=1;save();syncUI();};
 $('bBench').onclick=()=>{if(!bench)startBench();};
+$('bSpawn').onclick=()=>{for(let t=0;t<5;t++){const w=mkW(t,4);w.i=G.nid++;G.inv.push(w);cdSee(w);}const x=mkW(Math.random()*5|0,5);x.i=G.nid++;G.inv.push(x);cdSee(x);for(let u=1;u<=5;u++){const w=mkU(u);w.i=G.nid++;G.inv.push(w);cdSee(w);}G.gold+=99999;G.mat+=9999;G.lv=Math.max(G.lv,25);gsave();toast('Z×5・X・固有×5・G・素材を追加','#7ff0ff');};
 $('bHud').onclick=()=>{S.panel^=1;save();syncUI();};
 $('tg').onclick=()=>{S.panel^=1;save();syncUI();};
 $('rc').onclick=async()=>{try{await navigator.clipboard.writeText($('rt').value);$('rc').textContent='コピーしました';}catch(e){$('rt').select();$('rc').textContent='長押しでコピーしてください';}};
