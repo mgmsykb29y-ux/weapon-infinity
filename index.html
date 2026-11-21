@@ -94,6 +94,7 @@ html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",
 .it.sel .nm::before{content:"▶ ";color:#e8c85a}
 .mut{color:#7a88d0}.st{border-bottom:2px dotted #2a3a9a}
 #gate input,#dat textarea,#res textarea{border-radius:0;border:3px solid #c8c8d8}
+#ivBar{flex-wrap:nowrap;overflow-x:auto;touch-action:pan-x;padding:2px 2px 4px;flex:none}#ivBar .b{min-height:28px;padding:0 7px;font-size:11px;flex:none;box-shadow:0 0 0 2px #000,inset 0 0 0 1px #2a3a9a;border-width:2px}#ivQ{flex:none}
 </style>
 </head>
 <body>
@@ -114,8 +115,10 @@ html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",
   <div class="r2" style="gap:8px"><button class="b" id="mnTg" style="flex:1;min-height:44px"></button><button class="b" id="mnHd" style="flex:1;min-height:44px"></button></div>
   <button class="b big go" id="mnGo">出撃</button>
   <div class="r2" style="gap:8px"><button class="b" id="mnInv" style="flex:1;min-height:44px">所持品</button><button class="b" id="mnTr" style="flex:1;min-height:44px">強化所</button><button class="b" id="mnDat" style="flex:1;min-height:44px">データ</button></div>
+  <div class="r2" style="gap:8px"><button class="b" id="mnCd" style="flex:1;min-height:40px">図鑑</button><button class="b" id="mnCf" style="flex:1;min-height:40px">合成</button></div>
   <div class="mut" style="text-align:center">移動は自動／画面タップ・長押しで攻撃加速</div></div></div></div>
 <div id="inv" class="scr"><div class="r2"><button class="b" id="ivBack">← 戻る</button><span id="ivHead" style="flex:1"></span><button class="b" data-f="-1">全</button><button class="b" data-f="0">大剣</button><button class="b" data-f="1">弓</button><button class="b" data-f="2">魔導書</button><button class="b" data-f="3">槍</button><button class="b" data-f="4">双剣</button></div>
+ <div class="r2" style="gap:5px" id="ivBar"><button class="b" data-rk="-1">全ランク</button><button class="b" data-rk="0">C</button><button class="b" data-rk="1">B</button><button class="b" data-rk="2">A</button><button class="b" data-rk="3">S</button><button class="b" data-rk="4">Z</button><button class="b" data-rk="5">X</button><button class="b" id="ivSort"></button><input id="ivQ" placeholder="名前で検索" style="width:110px;min-height:30px;background:#02030c;color:#fff;border:3px solid #c8c8d8;border-radius:0;padding:0 6px;font:inherit;-webkit-user-select:text;user-select:text"><button class="b" id="ivAuto">自動装備</button><button class="b" id="ivPm"></button><button class="b" data-pm="0">P1</button><button class="b" data-pm="1">P2</button><button class="b" data-pm="2">P3</button></div>
  <div style="display:flex;gap:10px;flex:1;min-height:0"><div id="ivList" class="sc" style="width:46%"></div><div id="ivDet" class="sc" style="flex:1"></div></div></div>
 <div id="rs" class="scr"><div class="r2"><b id="rsTitle" style="font-size:17px"></b><span id="rsInfo" class="mut" style="white-space:pre-line;flex:1"></span></div>
  <div id="rsList" class="sc" style="flex:1"></div><div id="rsSum" class="mut"></div><div id="rsWarn" style="color:#f88;min-height:14px"></div>
@@ -124,6 +127,8 @@ html,body{font-family:"DotGothic16","Hiragino Maru Gothic ProN","Hiragino Sans",
  <textarea id="dtTx" placeholder="ここにコードを貼り付けて「読み込み」"></textarea><div id="dtMsg" class="mut" style="min-height:14px"></div>
  <div class="r2"><button class="b" id="dtOut" style="min-height:40px">コード出力</button><button class="b" id="dtIn" style="min-height:40px">読み込み</button><button class="b" id="dtMute" style="min-height:40px"></button><button class="b" id="dtBgm" style="min-height:40px"></button><button class="b warn" id="dtRst" style="min-height:40px;margin-left:auto">初期化</button></div></div>
 <div id="gr" class="scr"><div class="r2"><button class="b" id="grBack">← 戻る</button><span id="grHead" style="flex:1"></span></div><div id="grList" class="sc" style="flex:1"></div></div>
+<div id="cd" class="scr"><div class="r2"><button class="b" id="cdBack">← 戻る</button><span id="cdHead" style="flex:1"></span></div><div id="cdList" class="sc" style="flex:1"></div></div>
+<div id="cf" class="scr"><div class="r2"><button class="b" id="cfBack">← 戻る</button><span id="cfHead" style="flex:1"></span></div><div class="r2" id="cfBar" style="gap:5px"></div><div id="cfList" class="sc" style="flex:1"></div><div class="r2"><span id="cfSum" class="mut" style="flex:1"></span><button class="b on big" id="cfGo">合成する</button></div></div>
 <div id="tr" class="scr"><div class="r2"><button class="b" id="trBack">← 戻る</button><span id="trHead" style="flex:1"></span></div><div id="trList" class="sc" style="flex:1"></div></div>
 <div id="pk" class="scr" style="z-index:9;background:rgba(8,10,18,.9);align-items:center;justify-content:center;text-align:center"><div style="font-size:20px;font-weight:700">強化を選ぼう</div><div id="pkS" class="mut"></div><div id="pkC" class="r2" style="justify-content:center;gap:12px"></div></div>
 <div id="msg"></div>
@@ -200,7 +205,7 @@ function defG(){const g={v:1,up:[0,0,0,0,0],lv:1,exp:0,gold:0,mat:0,stage:1,sel:
 const num=(v,d,lo,hi)=>typeof v==='number'&&isFinite(v)?Math.min(hi,Math.max(lo,Math.floor(v))):d;
 function cleanW(o){if(!o||typeof o!=='object')return null;const t=num(o.t,0,0,4);return {i:num(o.i,0,0,1e9),t,r:num(o.r,0,0,5),s:num(o.s,1,0,4294967295),lv:num(o.lv,0,0,LV_MAX),lk:o.lk?1:0,ev:num(o.ev,0,0,3),lb:num(o.lb,0,0,2),aw:o.aw?1:0,fc:num(o.fc,0,0,99),rr:num(o.rr,0,0,99),rs:num(o.rs,0,0,4294967295),ns:num(o.ns,0,0,4294967295),sx:num(o.sx,0,0,3),un:num(o.un,0,0,5)};}
 function normG(o){const g=defG(),d=o&&typeof o==='object'?o:{};
-  g.up=[0,1,2,3,4].map(k=>num(Array.isArray(d.up)?d.up[k]:0,0,0,30));g.lv=num(d.lv,1,1,999);g.exp=num(d.exp,0,0,1e12);g.gold=num(d.gold,0,0,1e12);g.mat=num(d.mat,0,0,1e12);g.stage=num(d.stage,1,1,9999);g.sel=num(d.sel,1,1,g.stage);g.auto=num(d.auto,1,0,2);g.runs=num(d.runs,0,0,1e9);g.kills=num(d.kills,0,0,1e12);g.tg=num(d.tg,0,0,5);g.hd=num(d.hd,0,0,2);g.rb=num(d.rb,0,0,999);g.pt=num(d.pt,0,0,9999);
+  g.up=[0,1,2,3,4].map(k=>num(Array.isArray(d.up)?d.up[k]:0,0,0,30));g.lv=num(d.lv,1,1,999);g.exp=num(d.exp,0,0,1e12);g.gold=num(d.gold,0,0,1e12);g.mat=num(d.mat,0,0,1e12);g.stage=num(d.stage,1,1,9999);g.sel=num(d.sel,1,1,g.stage);g.auto=num(d.auto,1,0,4);g.runs=num(d.runs,0,0,1e9);g.kills=num(d.kills,0,0,1e12);g.tg=num(d.tg,0,0,5);g.hd=num(d.hd,0,0,2);g.rb=num(d.rb,0,0,999);g.pt=num(d.pt,0,0,9999);
   g.ac=Array.isArray(d.ac)?d.ac.filter(x=>Number.isInteger(x)&&x>=0&&x<64).slice(0,64):[];g.cd=Array.isArray(d.cd)?d.cd.filter(x=>Number.isInteger(x)&&x>=0&&x<128).slice(0,128):[];g.bs=Array.isArray(d.bs)?d.bs.filter(x=>Number.isInteger(x)&&x>0).slice(0,999):[];g.uk=Array.isArray(d.uk)?d.uk.filter(x=>Number.isInteger(x)&&x>=1&&x<=5):[];
   g.ps=[0,1,2].map(k=>{const q=Array.isArray(d.ps)&&Array.isArray(d.ps[k])?d.ps[k]:[0,0];return [num(q[0],0,0,1e9),num(q[1],0,0,1e9)];});g.hi={e:num(d.hi&&d.hi.e,0,0,1e7),d:num(d.hi&&d.hi.d,0,0,9999)};
   if(Array.isArray(d.inv)){const L=d.inv.map(cleanW).filter(w=>w&&w.i>0).slice(0,INV_MAX);if(L.length)g.inv=L;}
@@ -946,7 +951,7 @@ function dbgUpdate(){
 
 
 /* ---------- 拾い物（経験値・お金・武器）---------- */
-const PM=()=>(1+.03*(G.lv-1))*(1+.04*G.up[1]),MH=()=>300+20*(G.lv-1)+25*G.up[0];
+const PM=()=>(1+.03*(G.lv-1))*(1+.04*G.up[1])*(1+cdBonus())*(1+(G.rb|0)*.1),MH=()=>300+20*(G.lv-1)+25*G.up[0];
 const needExp=l=>Math.floor(60*Math.pow(l,1.6));
 function updPow(){for(let i=0;i<2;i++){const g=wById(G.eq[i])||G.inv[0];WP[i].pow=wd(g).atk*(i?.6:1)*PM();}}
 function spawnO(x,y,kd,val,w){
@@ -960,7 +965,7 @@ function absorb(kd,val,w){
     if(up){P.mhp=MH();P.hp=Math.min(P.mhp,P.hp+60);sfx('lv');updPow();toast('LEVEL UP!  Lv '+G.lv,'#ffd23f');burst(P.x,P.y,14,1,160,.6);fxAdd(0,P.x,P.y,0,85,.55,'#ffd23f');}}
   else if(kd===1)bGold+=Math.ceil(val*(1+.05*G.up[4])*[1,1.3,1.7][hd]);
   else{if(bag.length>=BAG_MAX){if(!bagFull){bagFull=1;toast('戦利品バッグが満杯です','#ff8a8a');}return;}
-    bag.push(w);if(val>=1)toast(RK[val]+'  '+wd(w).name,RCOL[val]);if(val>=3)shake=Math.max(shake,5);sfx('pick');burst(P.x,P.y,3+val*2,6+val,90,.35);}
+    bag.push(w);cdSee(w);if(val>=1)toast(RK[val]+'  '+wd(w).name,RCOL[val]);if(val>=3)shake=Math.max(shake,5);sfx('pick');burst(P.x,P.y,3+val*2,6+val,90,.35);}
 }
 function updPick(dt){
   for(let i=0;i<MAXD;i++){if(!oact[i])continue;otm[i]+=dt;
@@ -1043,8 +1048,14 @@ function renderMenu(){
   $('mnSt').textContent='STAGE '+G.sel;$('mnTh').textContent=th.n+(G.sel===G.stage?'　★最新':'');$('mnBoss').textContent='ボス：'+th.boss;$('mnTg').textContent='狙う武器：'+(G.tg?TYPES[G.tg-1]+'（出やすい）':'なし');$('mnHd').textContent=['難易度：ノーマル','難易度：ハード（レア↑報酬↑）','難易度：EXTREME（超レア↑）'][G.hd];$('mnHd').style.color=['','#ffb38a','#ff6a6a'][G.hd];$('mnStc').style.setProperty('--sc',th.acc[1]);
 }
 let invSel=0,invFilter=-1,invSlot=0,armed='';
+let invRank=-1,invSort=0,invQ='',pmSave=0;
+const SORTL=['並び：ランク順','並び：攻撃力','並び：新しい順','並び：属性'];
+function sortFn(){return invSort===1?(a,b)=>wd(b).atk-wd(a).atk:invSort===2?(a,b)=>b.i-a.i:invSort===3?(a,b)=>wd(b).el-wd(a).el||b.r-a.r:(a,b)=>b.r-a.r||wd(b).atk-wd(a).atk;}
 function renderInv(){
-  const L=G.inv.filter(w=>invFilter<0||w.t===invFilter).sort((a,b)=>b.r-a.r||wd(b).atk-wd(a).atk);
+  const q=invQ.trim();
+  const L=G.inv.filter(w=>(invFilter<0||w.t===invFilter)&&(invRank<0||w.r===invRank)&&(!q||wd(w).name.includes(q))).sort(sortFn());
+  document.querySelectorAll('[data-rk]').forEach(b=>b.classList.toggle('on',+b.dataset.rk===invRank));$('ivSort').textContent=SORTL[invSort];$('ivPm').textContent=pmSave?'プリセット：保存':'プリセット：読込';
+  document.querySelectorAll('[data-pm]').forEach(b=>{const q=G.ps[+b.dataset.pm],m=wById(q[0]),sb=wById(q[1]);b.textContent='P'+(+b.dataset.pm+1)+(m&&sb?'✓':'');});
   if(!L.find(w=>w.i===invSel))invSel=L.length?L[0].i:0;
   $('ivHead').innerHTML='所持品 '+G.inv.length+'/'+INV_MAX+'　<b>'+G.gold+'</b>G　素材 <b>'+G.mat+'</b>';
   document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',+b.dataset.f===invFilter));
@@ -1131,7 +1142,7 @@ function grAct(k){
   grArm='';let msg='';
   if(k==='enh'){const ok=doEnh(w);msg=ok?'強化成功！ +'+w.lv:'強化失敗…（失敗'+w.fc+'回、次回の成功率が上がります）';}
   else if(k==='lb'){const c=lbCost(w);if(w.lv>=capLv(w)&&(w.lb|0)<lbMax(w)&&G.gold>=c[0]&&G.mat>=c[1]){G.gold-=c[0];G.mat-=c[1];w.lb=(w.lb|0)+1;WD.delete(w);msg='限界突破！ 強化上限が+'+capLv(w)+'になりました';}}
-  else if(k==='ev'){const c=evCost(w);if(!w.ev&&!w.un&&w.r>=1&&w.lv>=5&&G.gold>=c[0]&&G.mat>=c[1]){G.gold-=c[0];G.mat-=c[1];let x=Math.random()*100,f=0;while(f<2&&x>=EVW[f]){x-=EVW[f];f++;}w.ev=f+1;WD.delete(w);noteCodex();msg='進化！ '+wd(w).name+'['+EVT[f]+']';}}
+  else if(k==='ev'){const c=evCost(w);if(!w.ev&&!w.un&&w.r>=1&&w.lv>=5&&G.gold>=c[0]&&G.mat>=c[1]){G.gold-=c[0];G.mat-=c[1];let x=Math.random()*100,f=0;while(f<2&&x>=EVW[f]){x-=EVW[f];f++;}w.ev=f+1;WD.delete(w);cdSee(w);msg='進化！ '+wd(w).name+'['+EVT[f]+']';}}
   else if(k==='aw'){const c=awCost(w);if((w.ev||w.un)&&(w.lb|0)>=lbMax(w)&&w.lv>=capLv(w)&&!w.aw&&G.gold>=c[0]&&G.mat>=c[1]){G.gold-=c[0];G.mat-=c[1];w.aw=1;WD.delete(w);msg='覚醒！';}}
   else if(k==='sk'){const c=skCost(w);if(G.mat>=c){G.mat-=c;const cur=skv(w),oth=[0,1,2].filter(x=>x!==cur);w.sx=oth[Math.random()*2|0]+1;msg='スキルが「'+SKN[w.t][skv(w)]+'」に変わりました';}}
   else if(k==='rr'){const c=rrCost(w);if(G.mat>=c&&(w.rr|0)<8&&!w.ns){G.mat-=c;let n=newSeed()||1;w.ns=n;msg='新しい結果が出ました。採用するか選んでください';}}
@@ -1140,11 +1151,47 @@ function grAct(k){
 function grNote(m){renderGr();if(m){const e=document.createElement('div');e.style.cssText='color:#ffd23f;font-size:15px;padding:4px 2px';e.textContent=m;$('grList').prepend(e);}}
 $('grList').onclick=e=>{const b=e.target.closest('[data-g]');if(!b||b.disabled)return;grAct(b.dataset.g);};
 $('grBack').onclick=()=>{grArm='';invSel=growSel;renderInv();show('inv');};
-function noteCodex(){}
+
+
+/* ---------- 図鑑 ---------- */
+function cdAdd(id){if(!G.cd.includes(id)){G.cd.push(id);return true;}return false;}
+function cdSee(w){cdAdd(w.t*6+w.r);const d=wd(w);if(d.el>=0)cdAdd(30+d.el);if(w.ev)cdAdd(40+w.t*3+w.ev-1);if(w.un)cdAdd(60+w.un-1);}
+const cdBonus=()=>.003*G.cd.length;
+function renderCd(){
+  const has=id=>G.cd.includes(id);
+  $('cdHead').innerHTML='<b>図鑑</b>　<span class="mut">発見 '+G.cd.length+'/65　全武器の攻撃力 +'+(cdBonus()*100).toFixed(1)+'%（1つ発見ごとに+0.3%）</span>';
+  let h='<div class="card2"><b>武器種 × ランク</b><div style="display:grid;grid-template-columns:70px repeat(6,1fr);gap:4px;margin-top:6px;align-items:center"><span></span>'+RK.map((k,r)=>'<b style="color:'+RCOL[r]+';text-align:center">'+k+'</b>').join('');
+  for(let t=0;t<5;t++){h+='<span class="mut">'+TYPES[t]+'</span>';for(let r=0;r<6;r++){const id=t*6+r;h+=has(id)?'<span style="text-align:center">'+wIcon(Object.assign(mkW(t,r,t*17+r+3)),34)+'</span>':'<span style="text-align:center;color:#3a4a8a;font-size:20px">？</span>';}}
+  h+='</div></div><div class="card2"><b>属性</b>　'+ELN.map((n,e)=>'<span style="color:'+(has(30+e)?ELC[e]:'#3a4a8a')+';margin-right:12px">'+(has(30+e)?n:'？')+'</span>').join('')+'</div>';
+  h+='<div class="card2"><b>進化形態</b><div class="mut">'+TYPES.map((n,t)=>n+'：'+[0,1,2].map(k=>has(40+t*3+k)?EVN[t][k]:'？').join(' / ')).join('<br>')+'</div></div>';
+  h+='<div class="card2"><b>固有武器（ボスハントで入手）</b><div class="mut">'+[1,2,3,4,5].map(u=>has(60+u-1)?'★'+UNQ[u].n+'（'+UNQ[u].pd+'）':'？？？').join('<br>')+'</div></div>';
+  $('cdList').innerHTML=h;
+}
+$('cdBack').onclick=()=>{renderMenu();show('menu');};
+/* ---------- 合成 ---------- */
+let cfRank=0,cfSel=new Set(),cfType=-1;
+const CFN=[3,3,3,5],CFG=[60,200,800,5000];
+function renderCf(){
+  const r=cfRank,n=CFN[r];$('cfHead').innerHTML='<b>合成</b>　<span class="mut">同じランクの武器'+n+'本 → 1つ上のランクの武器1本（種類は選べます）　所持金 '+G.gold+'G</span>';
+  $('cfBar').innerHTML=RK.slice(0,4).map((k,i)=>'<button class="b'+(i===r?' on':'')+'" data-cr="'+i+'">'+k+'→'+RK[i+1]+'</button>').join('')+'<span class="mut">出来る種類：</span>'+['おまかせ'].concat(TYPES).map((t,i)=>'<button class="b'+(cfType===i-1?' on':'')+'" data-ct="'+(i-1)+'">'+t+'</button>').join('');
+  const L=G.inv.filter(w=>w.r===r&&!w.un&&G.eq.indexOf(w.i)<0&&!w.lk).sort((a,b)=>wd(a).atk-wd(b).atk);
+  for(const i of Array.from(cfSel))if(!L.find(w=>w.i===i))cfSel.delete(i);
+  $('cfList').innerHTML=L.map(w=>rowOf(w,'<span class="at">'+ATK(w)+'</span><em>'+(cfSel.has(w.i)?'✔選択':'')+'</em>','data-i="'+w.i+'"')).join('')||'<div style="color:#789">対象の武器がありません（装備中・ロック中・固有は除外）</div>';
+  document.querySelectorAll('#cfList .it').forEach(e=>{if(cfSel.has(+e.dataset.i))e.classList.add('sel');});
+  $('cfSum').textContent='選択 '+cfSel.size+'/'+n+'　費用 '+CFG[r]+'G'+(G.inv.length-n+1>INV_MAX?'（所持が満杯）':'');
+  $('cfGo').disabled=!(cfSel.size===n&&G.gold>=CFG[r]);
+}
+$('cfBar').onclick=e=>{const a=e.target.closest('[data-cr]'),b=e.target.closest('[data-ct]');if(a){cfRank=+a.dataset.cr;cfSel.clear();renderCf();}if(b){cfType=+b.dataset.ct;renderCf();}};
+$('cfList').onclick=e=>{const t=e.target.closest('[data-i]');if(!t)return;const i=+t.dataset.i;if(cfSel.has(i))cfSel.delete(i);else if(cfSel.size<CFN[cfRank])cfSel.add(i);renderCf();};
+$('cfGo').onclick=()=>{const r=cfRank;if(cfSel.size!==CFN[r]||G.gold<CFG[r])return;G.gold-=CFG[r];G.inv=G.inv.filter(w=>!cfSel.has(w.i));cfSel.clear();
+  const nw=mkW(cfType>=0?cfType:Math.floor(Math.random()*TYPES.length),r+1);nw.i=G.nid++;G.inv.push(nw);cdSee(nw);gsave();ivNote='合成：'+RK[r+1]+'ランクの '+wd(nw).name+' ができました！';invSel=nw.i;renderCf();
+  $('cfHead').insertAdjacentHTML('beforeend','<br><b style="color:#ffd23f">できた！ '+RK[r+1]+' '+wd(nw).name+'</b>');};
+$('cfBack').onclick=()=>{renderMenu();show('menu');};
 let rsList=[],rsAct=[];
-const AUTOLAB=['おまかせ：なし','おまかせ：Cを売却','おまかせ：C・Bを売却'];
+const AUTOLAB=['おまかせ：なし','おまかせ：Cを売却','おまかせ：C・Bを売却','おまかせ：Cを分解','おまかせ：C・Bを分解'];
+const autoAct=w=>G.auto===0?0:G.auto<=2?(w.r<G.auto&&!w.un?1:0):(w.r<G.auto-2&&!w.un?2:0);
 function openResult(p){
-  rsList=p.loot.slice().sort((a,b)=>b.r-a.r);rsAct=rsList.map(w=>w.r<G.auto?1:0);
+  rsList=p.loot.slice().sort((a,b)=>b.r-a.r);rsAct=rsList.map(autoAct);
   $('rsTitle').textContent=p.kind==='clear'?'ステージクリア':p.kind==='dead'?'やられた':p.kind==='resume'?'前回の戦利品':'帰還';
   $('rsInfo').textContent=p.info;$('rsWarn').textContent='';renderRes();show('rs');mode='result';
 }
@@ -1174,12 +1221,18 @@ $('trBack').onclick=()=>{renderMenu();show('menu');};
 $('dtBgm').onclick=()=>{BGON^=1;try{localStorage.setItem('wi-bgm',BGON?'1':'0');}catch(e){}$('dtBgm').textContent='BGM：'+(BGON?'ON':'OFF');if(BGON)audioInit();};
 $('dtBgm').textContent='BGM：'+(BGON?'ON':'OFF');
 $('dtMute').onclick=()=>{S.mute^=1;save();$('dtMute').textContent='効果音：'+(S.mute?'OFF':'ON');if(!S.mute)audioInit();};
+document.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{invRank=+b.dataset.rk;renderInv();});
+$('ivSort').onclick=()=>{invSort=(invSort+1)%4;renderInv();};
+$('ivQ').oninput=()=>{invQ=$('ivQ').value;renderInv();};
+$('ivPm').onclick=()=>{pmSave^=1;renderInv();};
+document.querySelectorAll('[data-pm]').forEach(b=>b.onclick=()=>{const k=+b.dataset.pm;if(pmSave){G.ps[k]=[G.eq[0],G.eq[1]];pmSave=0;ivNote='プリセットP'+(k+1)+'に保存しました';}else{const q=G.ps[k];if(wById(q[0])&&wById(q[1])&&q[0]!==q[1]){G.eq=[q[0],q[1]];ivNote='プリセットP'+(k+1)+'を読み込みました';}else ivNote='P'+(k+1)+'は未保存です（「プリセット：保存」を押してから選択）';}gsave();renderInv();});
+$('ivAuto').onclick=()=>{const L=G.inv.slice().sort((a,b)=>wd(b).atk-wd(a).atk);if(L.length>=2){G.eq=[L[0].i,L[1].i];ivNote='攻撃力の高い2本を装備しました';gsave();renderInv();}};
 $('ivList').onclick=e=>{const t=e.target.closest('[data-i]');if(t){invSel=+t.dataset.i;armed='';renderInv();}};
 $('ivDet').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;if(b.dataset.s!=null){invSlot=+b.dataset.s;renderDetail();}else if(b.dataset.a)doAct(b.dataset.a);};
 $('pkC').onclick=e=>{const b=e.target.closest('[data-p]');if(b)pickPerk(b.dataset.p);};
 document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{invFilter=+b.dataset.f;renderInv();});
 $('rsList').onclick=e=>{const t=e.target.closest('[data-k]');if(t){const i=+t.dataset.k;rsAct[i]=(rsAct[i]+1)%3;renderRes();}};
-$('rsAuto').onclick=()=>{G.auto=(G.auto+1)%3;rsAct=rsList.map(w=>w.r<G.auto?1:0);renderRes();};
+$('rsAuto').onclick=()=>{G.auto=(G.auto+1)%5;rsAct=rsList.map(autoAct);renderRes();};
 $('rsOk').onclick=resDone;
 $('mnTg').onclick=()=>{G.tg=(G.tg+1)%6;renderMenu();gsave();};
 $('mnHd').onclick=()=>{G.hd=(G.hd+1)%3;renderMenu();gsave();};
@@ -1189,6 +1242,8 @@ $('mnInv').onclick=()=>{invSel=G.eq[0];invFilter=-1;armed='';renderInv();show('i
 $('ivBack').onclick=()=>{renderMenu();show('menu');};
 $('mnPrev').onclick=()=>{G.sel=Math.max(1,G.sel-1);renderMenu();gsave();};
 $('mnNext').onclick=()=>{G.sel=Math.min(G.stage,G.sel+1);renderMenu();gsave();};
+$('mnCd').onclick=()=>{renderCd();show('cd');};
+$('mnCf').onclick=()=>{cfSel.clear();renderCf();show('cf');};
 $('mnDat').onclick=()=>{$('dtMsg').textContent='';show('dat');};
 $('dtBack').onclick=()=>{show('menu');};
 $('dtOut').onclick=async()=>{const c=await exportCode();$('dtTx').value=c;try{await navigator.clipboard.writeText(c);$('dtMsg').textContent='コードを出力してコピーしました（'+c.length+'文字）。メモ等に保存してください。';}catch(e){$('dtTx').select();$('dtMsg').textContent='コードを出力しました。長押しでコピーして保存してください。';}};
@@ -1218,6 +1273,7 @@ $('rc').onclick=async()=>{try{await navigator.clipboard.writeText($('rt').value)
 $('rx').onclick=()=>{$('res').style.display='none';$('rc').textContent='コピー';};
 document.addEventListener('visibilitychange',()=>{paused=document.hidden;last=performance.now();acc=0;});
 
+for(const w of G.inv)cdSee(w);
 applySize();syncUI();renderMenu();
 if(G.pend)openResult(Object.assign({},G.pend,{kind:'resume'}));else show('menu');
 if(qs.get('autobench')){startBattle();setTimeout(startBench,300);}
